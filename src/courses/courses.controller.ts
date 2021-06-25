@@ -30,7 +30,7 @@ export class CoursesController {
         }
     }
 
-    @Get('stage/students')
+    @Get('stage/student')
     findStudentById(@Query('id') id: number) {
         return id;
     }
