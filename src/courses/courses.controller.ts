@@ -8,22 +8,22 @@ export class CoursesController {
 
     @Get()
     findAll(@Res() response) {
-        return response.status(200).send('List of courses');
+        return response.status(200).json(this.coursesService.findAll());
     }
 
     @Get(':id')
     findById(@Param('id') id: string) {
-        return `Course #${id}`;
+        return this.coursesService.findById(id);
     }
 
     @Post()
     create(@Body() body: any) {
-        return body;
+        return this.coursesService.create(body);
     }
 
-    @Put()
-    update(@Body() body: any) {
-        return body;
+    @Put(':id')
+    update(@Param('id') id: string, @Body() body: any) {
+        return this.coursesService.update(id, body);
     }
 
     @Patch(':id')
@@ -42,6 +42,6 @@ export class CoursesController {
     @Delete(':id')
     @HttpCode(HttpStatus.NO_CONTENT)
     delete(@Param('id') id: string) {
-        return null;
+        return this.coursesService.delete(id);
     }
 }
