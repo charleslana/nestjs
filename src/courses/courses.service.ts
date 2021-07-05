@@ -1,50 +1,55 @@
-import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
+import {Injectable, NotFoundException} from '@nestjs/common';
 import {Course} from './entities/course.entity';
+import {InjectRepository} from '@nestjs/typeorm';
+import {Repository} from 'typeorm';
+import {CreateCourseDto} from './dto/create-course.dto';
+import {UpdateCourseDto} from './dto/update-course.dto';
 
 @Injectable()
 export class CoursesService {
-    private courses: Course[] = [
-        {
-            id: 1,
-            name: 'Course NestJs',
-            description: 'Course NestJs description',
-            tags: [
-                'node.js',
-                'nestjs',
-                'javascript'
-            ]
-        }
-    ];
+    constructor(@InjectRepository(Course) private readonly courseRepository: Repository<Course>) {
 
-    findAll(): Course[] {
-        return this.courses;
     }
 
-    findById(id: string): Course {
-        const courseExists = this.courses.find((course: Course) => course.id === Number(id));
+    findAll(): Promise<Course[]> {
+        return this.courseRepository.find();
+    }
+
+    findById(id: string): Promise<Course> {
+        const courseExists = this.courseRepository.findOne(id);
 
         if (!courseExists) {
-            throw new HttpException(`Course ID ${id} not found.`, HttpStatus.NOT_FOUND);
+            throw new NotFoundException(`Course ID ${id} not found.`);
         }
 
         return courseExists;
     }
 
-    create(createCourseDto: any): any {
-        this.courses.push(createCourseDto);
-        return createCourseDto;
+    create(createCourseDto: CreateCourseDto): Promise<CreateCourseDto> {
+        const course = this.courseRepository.create(createCourseDto);
+        return this.courseRepository.save(course);
     }
 
-    update(id: string, updateCourseDto: any): any {
-        const indexCourse = this.courses.findIndex((course: Course) => course.id === Number(id));
-        this.courses[indexCourse] = updateCourseDto;
-    }
+    async update(id: string, updateCourseDto: UpdateCourseDto): Promise<UpdateCourseDto> {
+        const course = await this.courseRepository.preload({
+            id: +id,
+            ...updateCourseDto,
+        });
 
-    delete(id: string): any {
-        const indexCourse = this.courses.findIndex((course: Course) => course.id === Number(id));
-
-        if (indexCourse >= 0) {
-            this.courses.splice(indexCourse, 1);
+        if (!course) {
+            throw new NotFoundException(`Course ID ${id} not found.`);
         }
+
+        return this.courseRepository.save(course);
+    }
+
+    async delete(id: string): Promise<any> {
+        const course = await this.courseRepository.findOne(id);
+
+        if (!course) {
+            throw new NotFoundException(`Course ID ${id} not found.`);
+        }
+
+        return this.courseRepository.remove(course);
     }
 }
