@@ -9,8 +9,8 @@ export class CoursesController {
     }
 
     @Get()
-    findAll(@Res() response) {
-        return response.status(200).json(this.coursesService.findAll());
+    findAll() {
+        return this.coursesService.findAll();
     }
 
     @Get(':id')

@@ -15,8 +15,8 @@ export class CoursesService {
         return this.courseRepository.find();
     }
 
-    findById(id: string): Promise<Course> {
-        const courseExists = this.courseRepository.findOne(id);
+    async findById(id: string): Promise<Course> {
+        const courseExists = await this.courseRepository.findOne(id);
 
         if (!courseExists) {
             throw new NotFoundException(`Course ID ${id} not found.`);
